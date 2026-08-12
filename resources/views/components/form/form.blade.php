@@ -7,6 +7,6 @@
             <p class="text-muted-foreground mt-1">{{ $description }}</p>
         </div>
 
-       {{ $slot }}
+        {{ $slot }}
     </div>
 </div>
