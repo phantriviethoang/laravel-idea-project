@@ -2,12 +2,13 @@
     <div class="mx-auto flex h-16 max-w-7xl items-center justify-between">
         <div>
             <a href="/">
-                <img
+                {{-- <img
                     src="/images/logo.png"
                     width="100"
                     height="auto"
                     alt="Idea logo"
-                >
+                > --}}
+                <x-icons.logo class="h-8 w-auto" />
             </a>
         </div>
 
