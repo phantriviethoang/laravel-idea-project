@@ -37,6 +37,16 @@
             <div class="grid gap-6 md:grid-cols-2">
                 @forelse ($ideas as $idea)
                     <x-card href="{{ route('idea.show', $idea) }}">
+                        @if ($idea->image_path)
+                            <div class="-mx-4 mb-4 overflow-hidden rounded-t-lg">
+                                <img
+                                    src="{{ asset('storage/' . $idea->image_path) }}"
+                                    alt="{{ $idea->title }}"
+                                    class="h-w48uto w-full object-cover"
+                                >
+                            </div>
+                        @endif
+
                         <h3 class="text-foreground text-lg">{{ $idea->title }}</h3>
                         <div class="mt-1">
                             <x-idea.status-label status="{{ $idea->status }}">
@@ -69,6 +79,7 @@
                 }"
                 method="POST"
                 action="{{ route('idea.store') }}"
+                enctype="multipart/form-data"
             >
                 @csrf
 
@@ -117,6 +128,20 @@
                         type="textarea"
                         placeholder="Describe your idea..."
                     />
+
+                    <div class="space-y-2">
+                        <label
+                            for="iamge"
+                            class="label"
+                        >Feaured Image</label>
+
+                        <input
+                            type="file"
+                            name="image"
+                            accept="image/*"
+                        >
+                        <x-form.error name="image" />
+                    </div>
 
                     <div>
                         <fieldset class="space-y-2">
@@ -173,7 +198,10 @@
                         <fieldset class="space-y-2">
                             <legend class="label">Links</legend>
 
-                            <template x-for="(link, index) in links" :key="link">
+                            <template
+                                x-for="(link, index) in links"
+                                :key="link"
+                            >
                                 <div class="flex items-center gap-x-2">
                                     <input
                                         name="links[]"

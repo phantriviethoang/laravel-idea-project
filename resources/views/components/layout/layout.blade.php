@@ -14,7 +14,7 @@
 <body class="bg-background text-foreground">
     <x-layout.nav />
 
-    <main class="mx-auto max-w-2xl px-6 pb-10">
+    <main class="mx-auto max-w-7xl px-6 pb-10">
         {{ $slot }}
     </main>
 

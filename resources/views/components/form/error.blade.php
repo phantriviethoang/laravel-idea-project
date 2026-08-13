@@ -1,5 +1,6 @@
 @props(['name'])
 
-@error('status')
+@error($name)
     <p class="error">{{ $message }}</p>
 @enderror
+
