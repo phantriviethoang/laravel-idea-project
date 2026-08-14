@@ -9,7 +9,7 @@ use Illuminate\Support\Facades\DB;
 
 class UpdateIdea
 {
-    public function handle(array $attributes, Idea $idea)
+    public function handle(array $attributes, Idea $idea): void
     {
         $data = collect($attributes)->only([
             'title', 'description', 'status', 'links',
