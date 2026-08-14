@@ -10,7 +10,7 @@
             newLink: '',
             links: @js(old('links', $idea->links ?? [])),
             newStep: '',
-            steps: @js(old('step', $idea->steps->map(fn($step) => $step->description)))
+            steps: @js(old('step', $idea->steps->map->only(['id', 'description', 'completed'])))
         }"
         method="POST"
         action="{{ $idea->exists ? route('idea.update', $idea) : route('idea.store') }}"
@@ -105,12 +105,19 @@
 
                     <template
                         x-for="(step, index) in steps"
-                        :key="step"
+                        :key="step.id || index"
                     >
                         <div class="flex items-center gap-x-2">
                             <input
-                                name="steps[]"
-                                x-model="step"
+                                :name="`steps[${index}][description]`"
+                                x-model="step.description"
+                                class="input"
+                                readonly
+                            >
+                            <input
+                                type="hidden"
+                                :name="`steps[${index}][completed]`"
+                                x-model="step.complete ? '1' : '0'"
                                 class="input"
                                 readonly
                             >
@@ -138,7 +145,9 @@
 
                         <button
                             type="button"
-                            @click="steps.push(newStep.trim()); newStep = '';"
+                            @click="
+                                steps.push({description: newStep.trim(), completed: false}); newStep = '';
+                            "
                             data-test="submit-new-step-button"
                             :disabled="newStep.trim().length === 0"
                             aria-label="Add a new step"
