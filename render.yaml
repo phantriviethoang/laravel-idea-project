@@ -2,7 +2,7 @@ services:
   - type: web
     name: laravel-idea-project
     runtime: docker
-    plan: starter
+    plan: free
     region: singapore
 
     branch: master
@@ -30,11 +30,6 @@ services:
 
       - key: DB_DATABASE
         value: /var/data/database.sqlite
-
-    disk:
-      name: laravel-sqlite
-      mountPath: /var/data
-      sizeGB: 1
 
     healthCheckPath: /
 
