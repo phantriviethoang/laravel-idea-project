@@ -36,7 +36,7 @@ RUN composer install \
     --no-dev \
     --no-interaction \
     --prefer-dist \
-    --optimize \
+    --optimize-autoloader \
     --no-scripts
 
 # Frontend dependencies
