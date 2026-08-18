@@ -45,6 +45,7 @@ echo
 echo "=== Laravel migrations ==="
 
 php artisan migrate --force
+php artisan storage:link || true
 
 echo
 echo "=== Laravel optimization ==="
