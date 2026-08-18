@@ -36,7 +36,8 @@ RUN composer install \
     --no-dev \
     --no-interaction \
     --prefer-dist \
-    --optimize-autoloader
+    --optimize-autoloader \
+    --no-scripts
 
 # Frontend dependencies
 COPY package.json package-lock.json ./
@@ -45,6 +46,11 @@ RUN npm ci
 
 # Application
 COPY . .
+
+# Run Laravel Composer scripts after artisan exists
+RUN composer dump-autoload \
+    --no-dev \
+    --optimize-autoloader
 
 # Build Vite / Alpine.js
 RUN npm run build
