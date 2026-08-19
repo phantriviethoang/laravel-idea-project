@@ -1,85 +1,64 @@
-FROM php:8.4-fpm-bookworm
-
-# System dependencies
-RUN apt-get update && apt-get install -y \
-    nginx \
-    curl \
-    git \
-    unzip \
-    sqlite3 \
-    libsqlite3-dev \
-    libicu-dev \
-    libzip-dev \
-    && docker-php-ext-install \
-        pdo_sqlite \
-        intl \
-        zip \
-    && apt-get clean \
-    && rm -rf /var/lib/apt/lists/*
-
-# Composer
-COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
-
-# Node.js 22
-RUN curl -fsSL https://deb.nodesource.com/setup_22.x | bash - \
-    && apt-get install -y nodejs \
-    && npm install -g npm@11.16.0 \
-    && apt-get clean \
-    && rm -rf /var/lib/apt/lists/*
-
-WORKDIR /var/www/html
-
-# Composer dependencies
-COPY composer.json composer.lock ./
-
-RUN composer install \
-    --no-dev \
-    --no-interaction \
-    --prefer-dist \
-    --optimize-autoloader \
-    --no-scripts
-
-# Frontend dependencies
-COPY package.json package-lock.json ./
-
-RUN npm ci --include=dev
-
-# Application
+# Stage 1: Build frontend assets
+FROM node:22-alpine AS frontend
+WORKDIR /app
+COPY package*.json ./
+RUN npm ci
 COPY . .
-
-# Run Laravel Composer scripts after artisan exists
-RUN composer dump-autoload \
-    --no-dev \
-    --optimize
-
-# Build Vite / Alpine.js
 RUN npm run build
 
-# Laravel directories
-RUN mkdir -p \
-    storage/framework/cache \
-    storage/framework/sessions \
-    storage/framework/views \
-    storage/logs \
-    bootstrap/cache \
-    /var/data
+# Stage 2: Production PHP + Nginx runtime
+FROM php:8.4-fpm-alpine
 
-# Permissions
-RUN chown -R www-data:www-data \
-    storage \
-    bootstrap/cache \
-    /var/data
+# Install system dependencies & PHP extensions
+RUN apk add --no-cache \
+    nginx \
+    supervisor \
+    curl \
+    libpng-dev \
+    libxml2-dev \
+    libzip-dev \
+    oniguruma-dev \
+    icu-dev \
+    sqlite-dev \
+    && docker-php-ext-install \
+    pdo \
+    pdo_sqlite \
+    mbstring \
+    exif \
+    pcntl \
+    bcmath \
+    gd \
+    intl \
+    opcache \
+    zip
 
-# Nginx configuration
-COPY docker/nginx.conf /etc/nginx/conf.d/default.conf
+# Install Composer
+COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
 
-# PHP-FPM configuration
-COPY docker/www.conf /usr/local/etc/php-fpm.d/www.conf
+# Set working directory
+WORKDIR /var/www/html
 
-# Start script
-COPY docker/start.sh /usr/local/bin/start.sh
-RUN chmod +x /usr/local/bin/start.sh
+# Copy source code
+COPY . .
 
-EXPOSE 10000
+# Copy built frontend assets from Stage 1
+COPY --from=frontend /app/public/build ./public/build
 
-CMD ["/usr/local/bin/start.sh"]
+# Install PHP dependencies
+RUN composer install --no-dev --optimize-autoloader --no-interaction
+
+# Create database file & set permissions
+RUN mkdir -p database storage bootstrap/cache \
+    && touch database/database.sqlite \
+    && chown -R www-data:www-data database storage bootstrap/cache \
+    && chmod -R 775 database storage bootstrap/cache
+
+# Copy configuration files & entrypoint
+COPY docker/nginx.conf /etc/nginx/http.d/default.conf
+COPY docker/supervisord.conf /etc/supervisord.conf
+COPY docker/entrypoint.sh /usr/local/bin/entrypoint.sh
+RUN chmod +x /usr/local/bin/entrypoint.sh
+
+EXPOSE 80
+
+ENTRYPOINT ["/usr/local/bin/entrypoint.sh"]

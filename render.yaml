@@ -3,34 +3,20 @@ services:
     name: laravel-idea-project
     runtime: docker
     plan: free
-    region: singapore
-
-    branch: master
-
     dockerfilePath: ./Dockerfile
     dockerContext: .
-
-    autoDeployTrigger: commit
-
     envVars:
       - key: APP_ENV
         value: production
-
       - key: APP_DEBUG
         value: "false"
-
       - key: APP_KEY
         sync: false
-
       - key: APP_URL
         sync: false
-
       - key: DB_CONNECTION
         value: sqlite
-
       - key: DB_DATABASE
-        value: /var/data/database.sqlite
-
-    healthCheckPath: /
-
-    numInstances: 1
+        value: /var/www/html/database/database.sqlite
+      - key: RUN_MIGRATIONS
+        value: "true"
