@@ -1,8 +1,5 @@
 @import 'tailwindcss';
 
-@import './components/btn.css' layer(components);
-@import './components/form.css' layer(components);
-
 @source '../../vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php';
 @source '../../storage/framework/views/*.php';
 @source '../**/*.blade.php';
@@ -18,12 +15,30 @@
     --font-sans: 'Instrument Sans', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji',
         'Segoe UI Symbol', 'Noto Color Emoji';
 
-    --color-background: oklch(0.12 0 0);
-    --color-foreground: oklch(0.95 0 0);
-    --color-card: oklch(0.16 0 0);
-    --color-primary: oklch(0.65 0.15 160);
-    --color-primary-foreground: oklch(0.12 0 0);
-    --color-border: oklch(0.24 0 0);
-    --color-input: oklch(0.24 0 0);
-    --color-muted-foreground: oklch(0.6 0 0);
+    --color-background: var(--color-base-100);
+    --color-foreground: var(--color-base-content);
+    --color-card: var(--color-base-200);
+    --color-border: color-mix(in oklab, var(--color-base-content) 15%, transparent);
+    --color-input: var(--color-base-300);
+    --color-muted-foreground: color-mix(in oklab, var(--color-base-content) 60%, transparent);
 }
+
+@layer utilities {
+    .btn-outlined {
+        @apply btn-outline;
+    }
+
+    .form-muted-icon {
+        color: var(--color-muted-foreground);
+    }
+
+    .form-muted-icon:hover {
+        color: var(--color-foreground);
+    }
+
+    .error {
+        font-size: var(--text-sm);
+        color: var(--color-error, #f87171);
+    }
+}
+
